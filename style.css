@@ -1,27 +1,16 @@
-/* ===== CSS VARIABLES – Change these to match your logo ===== */
+/* ===== CSS VARIABLES ===== */
 :root {
     --primary: #1a3a6a;
-    /* Deep navy – primary brand color */
     --primary-light: #2a5a9a;
-    /* Lighter blue – for hover/gradients */
     --primary-dark: #0a1a3a;
-    /* Dark navy – for text on light bg */
     --accent: #d4a843;
-    /* Gold – for highlights and accents */
     --bg-page: #f0f4fa;
-    /* Page background (light blue-grey) */
     --bg-card: #ffffff;
-    /* White card backgrounds */
     --border: #d0d8e8;
-    /* Soft borders */
     --text: #1a1a2e;
-    /* Dark text */
     --text-muted: #5a6a8a;
-    /* Muted text (labels, subtitles) */
     --success: #27ae60;
-    /* Green for positive deltas */
     --danger: #e74c3c;
-    /* Red for negative deltas / delete */
 }
 
 /* ===== RESET & BASE ===== */
@@ -38,7 +27,7 @@ body {
 }
 
 /* ============================================================ */
-/* LOGIN PAGE */
+/* LOGIN PAGE (used by login.html) */
 /* ============================================================ */
 .login-page {
     display: flex;
@@ -134,7 +123,7 @@ body {
 }
 
 /* ============================================================ */
-/* MAIN APP */
+/* MAIN APP (used by dashboard.html) */
 /* ============================================================ */
 .app {
     display: flex;
@@ -350,6 +339,8 @@ header p {
     flex-wrap: wrap;
     margin-top: 8px;
 }
+
+/* ===== BUTTONS ===== */
 .btn {
     padding: 13px 34px;
     border: none;

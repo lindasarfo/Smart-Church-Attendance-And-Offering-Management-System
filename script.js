@@ -48,94 +48,13 @@ function saveUsers(users) {
 }
 
 // ============================================================
-//  SEED USERS – ensures superadmin always exists
+//  GET SESSION
 // ============================================================
-function seedUsers() {
-    let users = getUsers();
-    if (users.length === 0) {
-        users = [
-            { username: 'admin', password: 'admin123', role: 'superadmin' },
-            { username: 'user', password: 'user123', role: 'admin' }
-        ];
-        saveUsers(users);
-        return users;
-    }
-    const hasSuperAdmin = users.some(u => u.role === 'superadmin');
-    if (!hasSuperAdmin) {
-        const adminExists = users.some(u => u.username === 'admin');
-        if (!adminExists) {
-            users.push({ username: 'admin', password: 'admin123', role: 'superadmin' });
-        } else {
-            const adminUser = users.find(u => u.username === 'admin');
-            if (adminUser) adminUser.role = 'superadmin';
-            else users.push({ username: 'superadmin', password: 'admin123', role: 'superadmin' });
-        }
-        saveUsers(users);
-    }
-    return users;
-}
-seedUsers();
-
-// ============================================================
-//  AUTHENTICATION
-// ============================================================
-let currentUser = null;
-
-function login(username, password) {
-    const users = getUsers();
-    const found = users.find(u => u.username === username && u.password === password);
-    if (found) {
-        currentUser = { username: found.username, role: found.role };
-        return true;
-    }
-    return false;
-}
-
-function logout() {
-    currentUser = null;
-    document.getElementById('loginPage').classList.remove('hidden');
-    document.getElementById('appContainer').classList.add('hidden');
-    document.getElementById('loginError').textContent = '';
-    document.getElementById('loginUsername').value = 'admin';
-    document.getElementById('loginPassword').value = 'admin123';
-}
-
-function showApp() {
-    document.getElementById('loginPage').classList.add('hidden');
-    document.getElementById('appContainer').classList.remove('hidden');
-
-    // Update user badges
-    document.getElementById('currentUserBadge').textContent = '👤 ' + currentUser.username;
-    const roleBadge = document.getElementById('currentRoleBadge');
-    if (currentUser.role === 'superadmin') {
-        roleBadge.textContent = '⭐ Super Admin';
-        roleBadge.className = 'role-badge superadmin';
-    } else {
-        roleBadge.textContent = '👤 Admin';
-        roleBadge.className = 'role-badge admin';
-    }
-
-    // Update welcome banner
-    document.getElementById('welcomeName').textContent = currentUser.username;
-    const welcomeMsg = document.getElementById('welcomeMessage');
-    if (currentUser.role === 'superadmin') {
-        welcomeMsg.innerHTML = 'You have <span class="highlight">full administrative privileges</span> – including user management.';
-    } else {
-        welcomeMsg.innerHTML = 'You have <span class="highlight">access to all church data</span> – attendance, finance, reports, and analytics.';
-    }
-
-    // Show/hide Users tab
-    const usersTab = document.getElementById('usersTabBtn');
-    if (currentUser && currentUser.role === 'superadmin') {
-        usersTab.style.display = 'block';
-    } else {
-        usersTab.style.display = 'none';
-        if (document.getElementById('panel-users').classList.contains('active')) {
-            switchTab('dashboard');
-        }
-    }
-
-    renderAll();
+function getSession() {
+    try {
+        const raw = localStorage.getItem('church_session');
+        return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
 }
 
 // ============================================================
@@ -534,16 +453,16 @@ function renderTable() {
     sorted.forEach(r => {
         const income = (r.tithe || 0) + (r.offering || 0);
         html += `<tr>
-                    <td><strong>${r.date}</strong></td>
-                    <td>${r.men}</td><td>${r.women}</td><td>${r.adult}</td>
-                    <td>${r.gentlemen}</td><td>${r.ladies}</td><td>${r.youth}</td>
-                    <td>${r.boys}</td><td>${r.girls}</td><td>${r.children}</td>
-                    <td><strong>${r.total}</strong></td>
-                    <td>GH₵${(r.tithe||0).toLocaleString()}</td>
-                    <td>GH₵${(r.offering||0).toLocaleString()}</td>
-                    <td>GH₵${income.toLocaleString()}</td>
-                    <td><button class="delete-btn" data-date="${r.date}" title="Delete">✕</button></td>
-                </tr>`;
+            <td><strong>${r.date}</strong></td>
+            <td>${r.men}</td><td>${r.women}</td><td>${r.adult}</td>
+            <td>${r.gentlemen}</td><td>${r.ladies}</td><td>${r.youth}</td>
+            <td>${r.boys}</td><td>${r.girls}</td><td>${r.children}</td>
+            <td><strong>${r.total}</strong></td>
+            <td>GH₵${(r.tithe||0).toLocaleString()}</td>
+            <td>GH₵${(r.offering||0).toLocaleString()}</td>
+            <td>GH₵${income.toLocaleString()}</td>
+            <td><button class="delete-btn" data-date="${r.date}" title="Delete">✕</button></td>
+        </tr>`;
     });
     tbody.innerHTML = html;
 
@@ -561,7 +480,8 @@ function renderTable() {
 
 // --- USERS TABLE ---
 function renderUsersTable() {
-    if (!currentUser || currentUser.role !== 'superadmin') {
+    const session = getSession();
+    if (!session || session.role !== 'superadmin') {
         document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="4" class="table-empty">Access restricted.</td></tr>';
         return;
     }
@@ -573,15 +493,15 @@ function renderUsersTable() {
     }
     let html = '';
     users.forEach((u, index) => {
-        const isSelf = u.username === currentUser.username;
+        const isSelf = u.username === session.username;
         html += `<tr>
-                    <td>${u.username}</td>
-                    <td>${u.role}</td>
-                    <td>Active</td>
-                    <td>
-                        ${!isSelf ? `<button class="btn btn-danger btn-sm delete-user" data-index="${index}">✕</button>` : '—'}
-                    </td>
-                </tr>`;
+            <td>${u.username}</td>
+            <td>${u.role}</td>
+            <td>Active</td>
+            <td>
+                ${!isSelf ? `<button class="btn btn-danger btn-sm delete-user" data-index="${index}">✕</button>` : '—'}
+            </td>
+        </tr>`;
     });
     tbody.innerHTML = html;
     tbody.querySelectorAll('.delete-user').forEach(btn => {
@@ -740,7 +660,8 @@ function setupDeleteAll() {
 // ============================================================
 function setupAddUser() {
     document.getElementById('addUserBtn').addEventListener('click', function() {
-        if (!currentUser || currentUser.role !== 'superadmin') {
+        const session = getSession();
+        if (!session || session.role !== 'superadmin') {
             showToast('Only Super Admin can add users.', 'error');
             return;
         }
@@ -816,59 +737,15 @@ function setupDataTools() {
 }
 
 // ============================================================
-//  LOGIN / LOGOUT EVENTS
+//  LOGOUT
 // ============================================================
-function setupLogin() {
-    document.getElementById('loginBtn').addEventListener('click', function() {
-        const username = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
-        const error = document.getElementById('loginError');
-        if (!username || !password) {
-            error.textContent = 'Please enter username and password.';
-            return;
-        }
-        if (login(username, password)) {
-            error.textContent = '';
-            showApp();
-            showToast('Welcome, ' + username + '!', 'success');
-        } else {
-            error.textContent = 'Invalid username or password.';
-        }
-    });
-
-    document.getElementById('loginPassword').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') document.getElementById('loginBtn').click();
-    });
-    document.getElementById('loginUsername').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') document.getElementById('loginBtn').click();
-    });
-}
-
 function setupLogout() {
     document.getElementById('logoutBtn').addEventListener('click', function() {
         if (confirm('Are you sure you want to logout?')) {
-            logout();
-            showToast('Logged out.', 'warning');
+            localStorage.removeItem('church_session');
+            window.location.href = 'login.html';
         }
     });
-}
-
-// ============================================================
-//  RESET USERS (helper for fixing login issues)
-// ============================================================
-function resetUsers() {
-    if (confirm('⚠️ Reset all users to default (admin/admin123, user/user123)?')) {
-        const defaultUsers = [
-            { username: 'admin', password: 'admin123', role: 'superadmin' },
-            { username: 'user', password: 'user123', role: 'admin' }
-        ];
-        saveUsers(defaultUsers);
-        if (currentUser) {
-            logout();
-        }
-        showToast('Users reset to default. Please login again.', 'success');
-        location.reload();
-    }
 }
 
 // ============================================================
@@ -884,25 +761,67 @@ function showToast(message, type = 'success') {
 }
 
 // ============================================================
-//  INIT
+//  INIT – called after session check in dashboard.html
 // ============================================================
-function init() {
-    document.getElementById('recordDate').value = todayStr();
+function initDashboard() {
+    const session = getSession();
+    if (!session) {
+        window.location.href = 'login.html';
+        return;
+    }
 
+    console.log('✅ Dashboard initializing for:', session.username);
+
+    // Update user badges
+    document.getElementById('currentUserBadge').textContent = '👤 ' + session.username;
+    const roleBadge = document.getElementById('currentRoleBadge');
+    if (session.role === 'superadmin') {
+        roleBadge.textContent = '⭐ Super Admin';
+        roleBadge.className = 'role-badge superadmin';
+    } else {
+        roleBadge.textContent = '👤 Admin';
+        roleBadge.className = 'role-badge admin';
+    }
+
+    // Update welcome banner
+    document.getElementById('welcomeName').textContent = session.username;
+    const welcomeMsg = document.getElementById('welcomeMessage');
+    if (session.role === 'superadmin') {
+        welcomeMsg.innerHTML = 'You have <span class="highlight">full administrative privileges</span> – including user management.';
+    } else {
+        welcomeMsg.innerHTML = 'You have <span class="highlight">access to all church data</span> – attendance, finance, reports, and analytics.';
+    }
+
+    // Show/hide Users tab
+    const usersTab = document.getElementById('usersTabBtn');
+    if (session.role === 'superadmin') {
+        usersTab.style.display = 'block';
+    } else {
+        usersTab.style.display = 'none';
+        if (document.getElementById('panel-users').classList.contains('active')) {
+            switchTab('dashboard');
+        }
+    }
+
+    // Show the app
+    document.getElementById('appContainer').classList.remove('hidden');
+
+    // Setup all features
+    document.getElementById('recordDate').value = todayStr();
     setupAutoSum();
     setupFormSubmit();
     setupTabs();
     setupDeleteAll();
     setupDataTools();
     setupAddUser();
-    setupLogin();
     setupLogout();
 
-    // Ensure superadmin exists on every load
-    seedUsers();
-
-    // Start with login page
-    logout();
+    renderAll();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// Wait for DOM to load, then init
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboard);
+} else {
+    initDashboard();
+}
