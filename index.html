@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⛪ Church Attendance &amp; Offering System</title>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css" />
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- LOGIN PAGE -->
+    <!-- ============================================================ -->
+    <div class="login-page" id="loginPage">
+        <div class="login-box">
+            <div class="login-logo">
+                <!-- REPLACE WITH YOUR CHURCH LOGO -->
+                <img src="logo.png" alt="logo.png" />
+            </div>
+            <h1>Church Management</h1>
+            <p>Sign in to access the system</p>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="loginUsername" value="admin" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" value="admin123" />
+            </div>
+            <button class="btn-login" id="loginBtn">Login</button>
+            <div id="loginError" class="error-msg"></div>
+            <div style="margin-top: 16px; font-size: 12px; color: #5a6a8a; border-top: 1px solid #d0d8e8; padding-top: 12px;">
+                <strong>Default Credentials:</strong><br />
+                Super Admin: <code>admin</code> / <code>admin123</code><br />
+                Admin: <code>user</code> / <code>user123</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MAIN APP (hidden until login) -->
+    <!-- ============================================================ -->
+    <div class="app hidden" id="appContainer">
+
+        <!-- HEADER -->
+        <header>
+            <div class="header-left">
+                <!-- REPLACE WITH YOUR CHURCH LOGO -->
+                <img src="logo.png" alt="logo.png" class="logo.png" />
+                <div>
+                    <h1><span>⛪</span> Church Attendance &amp; Offering System</h1>
+                    <p>Track · Compare · Decide — Virtualize your church data for smarter ministry decisions</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <span class="user-badge" id="currentUserBadge">👤 admin</span>
+                <span class="role-badge" id="currentRoleBadge">Super Admin</span>
+                <button class="btn btn-danger btn-sm" id="logoutBtn">🚪 Logout</button>
+            </div>
+        </header>
+
+        <!-- TABS -->
+        <div class="tabs" id="mainTabs">
+            <button class="active" data-tab="dashboard">📊 Dashboard</button>
+            <button data-tab="add">➕ Add Record</button>
+            <button data-tab="records">📋 All Records</button>
+            <button data-tab="users" id="usersTabBtn" style="display:none;">👥 Users</button>
+        </div>
+
+        <!-- ===== DASHBOARD PANEL ===== -->
+        <div id="panel-dashboard" class="panel active">
+
+            <!-- Role-specific welcome -->
+            <div id="dashboardWelcome" class="welcome-banner">
+                <h2>👋 Welcome, <span id="welcomeName">Admin</span>!</h2>
+                <p id="welcomeMessage">You have full access to manage church data.</p>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid" id="summaryCards">
+                <div class="summary-card"><div class="label">Total Attendance</div><div class="value" id="sumTotalAttend">0</div><div class="sub">all time</div></div>
+                <div class="summary-card"><div class="label">Total Tithe</div><div class="value" id="sumTotalTithe">GH₵0</div><div class="sub">all time</div></div>
+                <div class="summary-card"><div class="label">Total Offering</div><div class="value" id="sumTotalOffering">GH₵0</div><div class="sub">all time</div></div>
+                <div class="summary-card"><div class="label">Total Income</div><div class="value" id="sumTotalIncome">GH₵0</div><div class="sub">tithe + offering</div></div>
+            </div>
+
+            <!-- Comparison Cards -->
+            <div class="comparison-grid" id="comparisonCards">
+                <div class="comparison-card">
+                    <div class="title">📅 Today vs Yesterday</div>
+                    <div id="compToday">Loading...</div>
+                </div>
+                <div class="comparison-card">
+                    <div class="title">📆 This Week vs Last Week</div>
+                    <div id="compWeek">Loading...</div>
+                </div>
+                <div class="comparison-card">
+                    <div class="title">📊 This Month vs Last Month</div>
+                    <div id="compMonth">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <h3>📈 Attendance Trend</h3>
+                    <canvas id="chartAttendance"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>💰 Tithe &amp; Offering Trend</h3>
+                    <canvas id="chartFinance"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>🧑‍🤝‍🧑 Sections Breakdown (Last 10)</h3>
+                    <canvas id="chartSections"></canvas>
+                </div>
+            </div>
+
+            <!-- Insights -->
+            <div class="insights-box" id="insightsBox">
+                <h3>💡 Insights &amp; Decision Support</h3>
+                <ul class="insights-list" id="insightsList">
+                    <li>Add some records to see powerful insights.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ===== ADD RECORD PANEL ===== -->
+        <div id="panel-add" class="panel">
+            <form id="recordForm" autocomplete="off">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>📅 Date</label>
+                        <input type="date" id="recordDate" required />
+                    </div>
+                    <div class="form-group">
+                        <label>👨 Men (Adult)</label>
+                        <input type="number" id="inputMen" min="0" value="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label>👩 Women (Adult)</label>
+                        <input type="number" id="inputWomen" min="0" value="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label>🧑 Adult Total</label>
+                        <input type="text" id="inputAdult" readonly value="0" />
+                        <span class="sum-label">auto‑summed</span>
+                    </div>
+                    <div class="form-group">
+                        <label>🧑‍💼 Gentlemen (Youth)</label>
+                        <input type="number" id="inputGentlemen" min="0" value="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label>👩‍💼 Ladies (Youth)</label>
+                        <input type="number" id="inputLadies" min="0" value="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label>🧑‍🤝‍🧑 Youth Total</label>
+                        <input type="text" id="inputYouth" readonly value="0" />
+                        <span class="sum-label">auto‑summed</span>
+                    </div>
+                    <div class="form-group">
+                        <label>👦 Boys (Children)</label>
+                        <input type="number" id="inputBoys" min="0" value="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label>👧 Girls (Children)</label>
+                        <input type="number" id="inputGirls" min="0" value="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label>👶 Children Total</label>
+                        <input type="text" id="inputChildren" readonly value="0" />
+                        <span class="sum-label">auto‑summed</span>
+                    </div>
+                    <div class="form-group">
+                        <label>📊 Grand Total Attendance</label>
+                        <input type="text" id="inputGrandTotal" readonly value="0" />
+                        <span class="sum-label">auto‑summed</span>
+                    </div>
+                    <div class="form-group">
+                        <label>💵 Tithe (GH₵)</label>
+                        <input type="number" id="inputTithe" min="0" value="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label>💲 Offering (GH₵)</label>
+                        <input type="number" id="inputOffering" min="0" value="0" required />
+                    </div>
+                    <div class="form-group">
+                        <label>📊 Total Income</label>
+                        <input type="text" id="inputTotalIncome" readonly value="0" />
+                        <span class="sum-label">tithe + offering</span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 Save Record</button>
+                        <button type="reset" class="btn btn-secondary">🔄 Reset</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ===== ALL RECORDS PANEL ===== -->
+        <div id="panel-records" class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <h3 style="color:#1a1a2e;">📋 All Saved Records</h3>
+                <button class="btn btn-danger btn-sm" id="deleteAllBtn">🗑️ Delete All</button>
+            </div>
+            <div class="data-tools">
+                <button class="btn btn-success btn-sm" id="exportDataBtn">⬇️ Export Data</button>
+                <button class="btn btn-secondary btn-sm" id="importDataBtn">📂 Import Data</button>
+                <input type="file" id="importInput" accept=".json" />
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Men</th><th>Women</th><th>Adult</th>
+                            <th>Gent.</th><th>Ladies</th><th>Youth</th>
+                            <th>Boys</th><th>Girls</th><th>Children</th>
+                            <th>Total</th>
+                            <th>Tithe</th><th>Offering</th><th>Income</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody">
+                        <tr><td colspan="15" class="table-empty">No records yet. Start adding!</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== USERS PANEL (Super Admin only) ===== -->
+        <div id="panel-users" class="panel">
+            <h2>👥 User Management</h2>
+            <p style="color:#5a6a8a; margin-bottom:16px;">Add or remove admin users. (Super Admin cannot be deleted.)</p>
+            <div class="user-actions">
+                <button class="btn btn-success" id="addUserBtn">➕ Add Admin</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="4" class="table-empty">No users.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
