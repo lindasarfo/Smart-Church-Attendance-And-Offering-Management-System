@@ -139,54 +139,65 @@ body {
     display: none;
 }
 
-/* ===== HEADER ===== */
+/* ===== HEADER – Logo on top, title below ===== */
 header {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
     color: #fff;
     padding: 20px 34px;
     border-radius: 20px 20px 0 0;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
+    text-align: center;
 }
-.header-left {
+
+.header-center {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
+    width: 100%;
 }
+
 .church-logo {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.3);
     padding: 2px;
     background: #fff;
 }
-header h1 {
-    font-size: 22px;
+
+.header-title-group h1 {
+    font-size: 24px;
     font-weight: 700;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
-header h1 span {
+.header-title-group h1 span {
     font-size: 26px;
 }
-header p {
+.header-title-group p {
     font-size: 14px;
     opacity: 0.85;
     font-weight: 300;
     margin-top: 2px;
 }
+
 .header-right {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     flex-wrap: wrap;
+    margin-top: 4px;
 }
+
 .user-badge {
     background: rgba(255, 255, 255, 0.15);
     padding: 6px 16px;
@@ -647,18 +658,17 @@ table .delete-btn:hover {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     header {
-        flex-direction: column;
-        align-items: stretch;
-        text-align: center;
         padding: 16px;
     }
-    .header-left {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+    .church-logo {
+        width: 50px;
+        height: 50px;
     }
-    .header-right {
-        justify-content: center;
+    .header-title-group h1 {
+        font-size: 20px;
+    }
+    .header-title-group p {
+        font-size: 12px;
     }
     .login-box {
         width: 90%;
@@ -675,8 +685,32 @@ table .delete-btn:hover {
         border-radius: 16px 16px 0 0;
         padding: 14px;
     }
-    header h1 {
+    .church-logo {
+        width: 45px;
+        height: 45px;
+    }
+    .header-title-group h1 {
         font-size: 18px;
+    }
+    .header-title-group p {
+        font-size: 11px;
+    }
+    .header-right {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    .user-badge {
+        font-size: 12px;
+        padding: 4px 12px;
+    }
+    .role-badge {
+        font-size: 10px;
+        padding: 3px 10px;
+    }
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 12px;
     }
     .panel {
         padding: 18px 14px 22px;

@@ -131,21 +131,7 @@
     </div>
 
     <script>
-        // ============================================================
-        //  REDIRECT IF ALREADY LOGGED IN
-        // ============================================================
-        try {
-            const session = localStorage.getItem('church_session');
-            if (session) {
-                const data = JSON.parse(session);
-                if (data && data.username) {
-                    window.location.href = 'dashboard.html';
-                }
-            }
-        } catch (e) {
-            // If session is corrupt, ignore and show login
-            localStorage.removeItem('church_session');
-        }
+       
 
         // ============================================================
         //  LOGIN LOGIC
